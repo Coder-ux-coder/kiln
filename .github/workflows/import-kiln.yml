@@ -34,7 +34,7 @@ jobs:
           test "$(find _source_kiln/kiln -type f | wc -l)" -eq 19
           cp -a _source_kiln/kiln/. ./
           rm -rf _source_kiln
-          rm .github/workflows/import-kiln.yml
+          rm .github/workflows/release.yml
           test "$(find . -type f -not -path './.git/*' | wc -l)" -eq 19
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
