@@ -1,0 +1,44 @@
+name: Import existing Kiln application
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-kiln.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out destination repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Check out the exact original Kiln commit
+        uses: actions/checkout@v4
+        with:
+          repository: Coder-ux-coder/claude
+          ref: 7e97a762ddce5960282729980d7784f84890b85a
+          path: _source_kiln
+          persist-credentials: false
+
+      - name: Copy only the original kiln folder into repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _source_kiln rev-parse HEAD)" = "7e97a762ddce5960282729980d7784f84890b85a"
+          test "$(find _source_kiln/kiln -type f | wc -l)" -eq 19
+          cp -a _source_kiln/kiln/. ./
+          rm -rf _source_kiln
+          rm .github/workflows/import-kiln.yml
+          test "$(find . -type f -not -path './.git/*' | wc -l)" -eq 19
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Kiln 1.0.0'
+          git push origin HEAD:main
